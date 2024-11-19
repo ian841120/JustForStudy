@@ -2,6 +2,7 @@
 #include <wrl.h>
 #include "cputimer.h"
 #include "Graphic\graphics.h"
+#include "Graphic\sprite.h"
 #include <memory>
 class Framework
 {
@@ -19,4 +20,5 @@ public:
 	HWND hwnd;
 	CpuTimer timer;
 	Graphics graphics;
+	Sprite sprite;
 };

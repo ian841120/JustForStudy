@@ -12,6 +12,7 @@ void Framework::update(float elapsedTime)
 }
 void Framework::render()
 {
+	
 	ImGui::ShowDemoWindow();
 	FLOAT color[]{ 0.5f,0.5f,0.5f, 0.2f };
 	ID3D11DeviceContext* dc = graphics.getDeviceContext();
@@ -21,6 +22,7 @@ void Framework::render()
 	dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	dc->OMSetRenderTargets(1, &rtv, dsv);
 	graphics.getImGuiClass()->render();
+	sprite.render();
 	graphics.getSwapChain()->Present(syncInterval, 0);
 }
 void Framework::calculateFrameRates()
