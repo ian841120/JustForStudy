@@ -13,7 +13,10 @@ void Framework::update(float elapsedTime)
 void Framework::render()
 {
 	
-	ImGui::ShowDemoWindow();
+	ImGui::Begin("download_png");
+	if (ImGui::Button("button 1")) {
+		sprite.print();
+	}
 	FLOAT color[]{ 0.5f,0.5f,0.5f, 0.2f };
 	ID3D11DeviceContext* dc = graphics.getDeviceContext();
 	ID3D11RenderTargetView* rtv = graphics.getRenderTargetView();

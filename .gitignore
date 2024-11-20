@@ -51,3 +51,4 @@ bld/
 .vs/
 
 *.ini
+Shader/

@@ -189,6 +189,7 @@
     <ClInclude Include="External\imgui\imstb_rectpack.h" />
     <ClInclude Include="External\imgui\imstb_textedit.h" />
     <ClInclude Include="External\imgui\imstb_truetype.h" />
+    <ClInclude Include="External\stb_image_write.h" />
     <ClInclude Include="Source\cputimer.h" />
     <ClInclude Include="Source\framework.h" />
     <ClInclude Include="Source\Graphic\graphics.h" />

@@ -101,6 +101,9 @@
     <ClInclude Include="Source\Graphic\sprite.h">
       <Filter>ヘッダー ファイル</Filter>
     </ClInclude>
+    <ClInclude Include="External\stb_image_write.h">
+      <Filter>External</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\sprite.hlsli">

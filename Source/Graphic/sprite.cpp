@@ -1,6 +1,6 @@
 #include "sprite.h"
 #include <fstream>
-
+#include <vector>
 Sprite::Sprite()
 {
 	ID3D11Device* device = Graphics::getInstance().getDevice();
@@ -88,4 +88,26 @@ void Sprite::render()
 	device_context->PSSetShader(pixel_shader.Get(), nullptr, 0);
 
 	device_context->Draw(4,0);
+}
+void Sprite::print()
+{
+	int iPixelWidth = 300;//PNGファイルの幅（ピクセル単位）
+	int iPixelHeight = 300;//PNGファイルの高さ（ピクセル単位）
+	std::vector<unsigned char> vecData(iPixelWidth * iPixelHeight * 4);
+
+	//イメージデータ格納
+	for (int j = 0; j < iPixelHeight; j++)
+	{
+		for (int i = 0; i < iPixelWidth; i++)
+		{
+			int iP = (j * iPixelWidth + i) * 4;
+
+			vecData[iP] = 0;//R
+			vecData[iP + 1] = 150;//G
+			vecData[iP + 2] = 0;//B
+			vecData[iP + 3] = 255;//A
+		}
+	}
+
+	stbi_write_png("image.png", iPixelWidth, iPixelHeight, 4, &vecData.front(), 0);
 }
