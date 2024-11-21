@@ -17,6 +17,7 @@ void Framework::render()
 	if (ImGui::Button("button 1")) {
 		sprite.print();
 	}
+	ImGui::End();
 	FLOAT color[]{ 0.5f,0.5f,0.5f, 0.2f };
 	ID3D11DeviceContext* dc = graphics.getDeviceContext();
 	ID3D11RenderTargetView* rtv = graphics.getRenderTargetView();

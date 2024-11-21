@@ -1,6 +1,9 @@
 #include "sprite.h"
 #include <fstream>
 #include <vector>
+#pragma warning( disable : 4996 )
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "../stb_image_write.h"
 Sprite::Sprite()
 {
 	ID3D11Device* device = Graphics::getInstance().getDevice();
@@ -87,27 +90,57 @@ void Sprite::render()
 	device_context->VSSetShader(vertex_shader.Get(), nullptr, 0);
 	device_context->PSSetShader(pixel_shader.Get(), nullptr, 0);
 
-	device_context->Draw(4,0);
+	device_context->Draw(3,0);
 }
-void Sprite::print()
+void Sprite::print(std::string filename )
 {
-	int iPixelWidth = 300;//PNGファイルの幅（ピクセル単位）
-	int iPixelHeight = 300;//PNGファイルの高さ（ピクセル単位）
-	std::vector<unsigned char> vecData(iPixelWidth * iPixelHeight * 4);
+	ID3D11DeviceContext* device_context = Graphics::getInstance().getDeviceContext();
+	D3D11_MAPPED_SUBRESOURCE mapped_subresource;
+	HRESULT hr = device_context->Map(vertex_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_subresource);
+	_ASSERT_EXPR(SUCCEEDED(hr), "map failed");
+	Vertex* v = static_cast<Vertex*>(mapped_subresource.pData);
 
+	device_context->Unmap(vertex_buffer.Get(), 0);
+
+	D3D11_VIEWPORT viewport;
+	UINT num_viewports = 1;
+	device_context->RSGetViewports(&num_viewports, &viewport);
+	int iPixelWidth = viewport.Width * 0.5f * (v[1].position.x - v[0].position.x);
+	int iPixelHeight = viewport.Height * 0.5f * (v[0].position.y - v[2].position.y);//PNGファイルの高さ（ピクセル単位）
+	std::vector<unsigned char> vecData(iPixelWidth * iPixelHeight * 4);
 	//イメージデータ格納
 	for (int j = 0; j < iPixelHeight; j++)
 	{
+		DirectX::XMFLOAT4 temp[2];
+		temp[0].x = v[0].color.x + j * (v[2].color.x - v[0].color.x) / iPixelHeight;
+		temp[0].y = v[0].color.y + j * (v[2].color.y - v[0].color.y) / iPixelHeight;
+		temp[0].z = v[0].color.z + j * (v[2].color.z - v[0].color.z) / iPixelHeight;
+		temp[0].w = v[0].color.w + j * (v[2].color.w - v[0].color.w) / iPixelHeight;
+		temp[1].x = v[1].color.x + j * (v[2].color.x - v[1].color.x) / iPixelHeight;
+		temp[1].y = v[1].color.y + j * (v[2].color.y - v[1].color.y) / iPixelHeight;
+		temp[1].z = v[1].color.z + j * (v[2].color.z - v[1].color.z) / iPixelHeight;
+		temp[1].w = v[1].color.w + j * (v[2].color.w - v[1].color.w) / iPixelHeight;
 		for (int i = 0; i < iPixelWidth; i++)
 		{
 			int iP = (j * iPixelWidth + i) * 4;
 
-			vecData[iP] = 0;//R
-			vecData[iP + 1] = 150;//G
-			vecData[iP + 2] = 0;//B
-			vecData[iP + 3] = 255;//A
+			vecData[iP] = (temp[0].x + i * (temp[1].x - temp[0].x) / iPixelWidth) * 255;
+			vecData[iP + 1] = (temp[0].y + i * (temp[1].y - temp[0].y) / iPixelWidth) * 255;
+			vecData[iP + 2] = (temp[0].z + i * (temp[1].z - temp[0].z) / iPixelWidth) * 255;
+			vecData[iP + 3] = (temp[0].w + i * (temp[1].w - temp[0].w) / iPixelWidth) * 255;
 		}
 	}
-
-	stbi_write_png("image.png", iPixelWidth, iPixelHeight, 4, &vecData.front(), 0);
+	
+	int index = 1;
+	int length = filename.length();
+	std::string temp_filename = filename;
+	while (1)
+	{
+		std::ifstream file_check(temp_filename +".png");
+		if (!file_check.good())
+			break;
+		temp_filename = filename+ "(" + std::to_string(index++) + ")";
+	}
+	temp_filename += ".png";
+	stbi_write_png(temp_filename.c_str(), iPixelWidth, iPixelHeight, 3, &vecData.front(), 0);
 }

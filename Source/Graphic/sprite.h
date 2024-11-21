@@ -3,9 +3,10 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include "graphics.h"
-#pragma warning( disable : 4996 )
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include "../stb_image_write.h"
+#include <string>
+
+
+
 
 class Sprite
 {
@@ -18,7 +19,8 @@ public:
 		DirectX::XMFLOAT4 color;
 	};
 	void render();
-	void print();
+	void print(std::string filename = "sample");
+	ID3D11Buffer* getVertexBuffer() { return vertex_buffer.Get(); }
 private:
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertex_shader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixel_shader;
