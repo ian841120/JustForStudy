@@ -89,6 +89,7 @@
       <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\2210284\Desktop\JustForStudy\dev\JustForStudy\External\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -110,6 +111,7 @@
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\2210284\Desktop\JustForStudy\dev\JustForStudy\External\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -131,6 +133,7 @@
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\2210284\Desktop\JustForStudy\dev\JustForStudy\External\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -152,6 +155,7 @@
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <AdditionalIncludeDirectories>C:\Users\2210284\Desktop\JustForStudy\dev\JustForStudy\External\imgui;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -175,6 +179,7 @@
     <ClCompile Include="External\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Source\cputimer.cpp" />
     <ClCompile Include="Source\framework.cpp" />
+    <ClCompile Include="Source\Graphic\gpuResourceUtils.cpp" />
     <ClCompile Include="Source\Graphic\graphics.cpp" />
     <ClCompile Include="Source\Graphic\imGuiClass.cpp" />
     <ClCompile Include="Source\Graphic\sprite.cpp" />
@@ -192,12 +197,14 @@
     <ClInclude Include="External\stb_image_write.h" />
     <ClInclude Include="Source\cputimer.h" />
     <ClInclude Include="Source\framework.h" />
+    <ClInclude Include="Source\Graphic\gpuResourceUtils.h" />
     <ClInclude Include="Source\Graphic\graphics.h" />
     <ClInclude Include="Source\Graphic\imGuiClass.h" />
     <ClInclude Include="Source\Graphic\sprite.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\sprite.hlsli" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\spritePS.hlsl">
@@ -215,5 +222,12 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="packages\directxtex_desktop_2019.2024.10.29.1\build\native\directxtex_desktop_2019.targets" Condition="Exists('packages\directxtex_desktop_2019.2024.10.29.1\build\native\directxtex_desktop_2019.targets')" />
   </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>このプロジェクトは、このコンピューター上にない NuGet パッケージを参照しています。それらのパッケージをダウンロードするには、[NuGet パッケージの復元] を使用します。詳細については、http://go.microsoft.com/fwlink/?LinkID=322105 を参照してください。見つからないファイルは {0} です。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('packages\directxtex_desktop_2019.2024.10.29.1\build\native\directxtex_desktop_2019.targets')" Text="$([System.String]::Format('$(ErrorText)', 'packages\directxtex_desktop_2019.2024.10.29.1\build\native\directxtex_desktop_2019.targets'))" />
+  </Target>
 </Project>

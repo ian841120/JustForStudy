@@ -60,6 +60,9 @@
     <ClCompile Include="Source\Graphic\sprite.cpp">
       <Filter>ソース ファイル</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Graphic\gpuResourceUtils.cpp">
+      <Filter>ソース ファイル</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="External\imgui\imconfig.h">
@@ -104,11 +107,15 @@
     <ClInclude Include="External\stb_image_write.h">
       <Filter>External</Filter>
     </ClInclude>
+    <ClInclude Include="Source\Graphic\gpuResourceUtils.h">
+      <Filter>ヘッダー ファイル</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="HLSL\sprite.hlsli">
       <Filter>HLSL</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="HLSL\spritePS.hlsl">

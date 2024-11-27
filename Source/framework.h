@@ -20,5 +20,5 @@ public:
 	HWND hwnd;
 	CpuTimer timer;
 	Graphics graphics;
-	Sprite sprite;
+	std::unique_ptr<Sprite> sprite[8];
 };

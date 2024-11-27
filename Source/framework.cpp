@@ -5,6 +5,9 @@
 static const int syncInterval = 1;
 Framework::Framework(HWND hwnd) :hwnd(hwnd),graphics(hwnd)
 {
+	sprite[0] = std::make_unique<Sprite>("Data/kirakira64.png");
+	sprite[1] = std::make_unique<Sprite>("Data/kirakira64.png");
+
 }
 void Framework::update(float elapsedTime)
 {
@@ -12,12 +15,6 @@ void Framework::update(float elapsedTime)
 }
 void Framework::render()
 {
-	
-	ImGui::Begin("download_png");
-	if (ImGui::Button("button 1")) {
-		sprite.print();
-	}
-	ImGui::End();
 	FLOAT color[]{ 0.5f,0.5f,0.5f, 0.2f };
 	ID3D11DeviceContext* dc = graphics.getDeviceContext();
 	ID3D11RenderTargetView* rtv = graphics.getRenderTargetView();
@@ -26,7 +23,14 @@ void Framework::render()
 	dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	dc->OMSetRenderTargets(1, &rtv, dsv);
 	graphics.getImGuiClass()->render();
-	sprite.render();
+
+	//Sprite Render
+	{
+		sprite[0].get()->render();
+		sprite[1].get()->render(300, 200, 500, 300, 1, 1, 1, 1);
+
+	}
+
 	graphics.getSwapChain()->Present(syncInterval, 0);
 }
 void Framework::calculateFrameRates()
