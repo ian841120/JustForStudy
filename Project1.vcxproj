@@ -181,7 +181,9 @@
     <ClCompile Include="Source\framework.cpp" />
     <ClCompile Include="Source\Graphic\gpuResourceUtils.cpp" />
     <ClCompile Include="Source\Graphic\graphics.cpp" />
+    <ClCompile Include="Source\Graphic\image.cpp" />
     <ClCompile Include="Source\Graphic\imGuiClass.cpp" />
+    <ClCompile Include="Source\Graphic\perlin_noise.cpp" />
     <ClCompile Include="Source\Graphic\sprite.cpp" />
     <ClCompile Include="Source\main.cpp" />
   </ItemGroup>
@@ -199,14 +201,29 @@
     <ClInclude Include="Source\framework.h" />
     <ClInclude Include="Source\Graphic\gpuResourceUtils.h" />
     <ClInclude Include="Source\Graphic\graphics.h" />
+    <ClInclude Include="Source\Graphic\image.h" />
     <ClInclude Include="Source\Graphic\imGuiClass.h" />
+    <ClInclude Include="Source\Graphic\perlin_noise.h" />
     <ClInclude Include="Source\Graphic\sprite.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="HLSL\perlinNoise.hlsli" />
     <None Include="HLSL\sprite.hlsli" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="HLSL\perlinNoisePS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="HLSL\perlinNoiseVS.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="HLSL\spritePS.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>

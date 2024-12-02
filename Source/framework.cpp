@@ -5,8 +5,8 @@
 static const int syncInterval = 1;
 Framework::Framework(HWND hwnd) :hwnd(hwnd),graphics(hwnd)
 {
-	sprite[0] = std::make_unique<Sprite>("Data/kirakira64.png");
-	sprite[1] = std::make_unique<Sprite>("Data/kirakira64.png");
+	perlin_noise = std::make_unique<PerlinNoise>(1235264);
+	perlin_noise->createMesh(512, 512);
 
 }
 void Framework::update(float elapsedTime)
@@ -26,9 +26,7 @@ void Framework::render()
 
 	//Sprite Render
 	{
-		sprite[0].get()->render();
-		sprite[1].get()->render(300, 200, 500, 300, 1, 1, 1, 1);
-
+		perlin_noise->render();
 	}
 
 	graphics.getSwapChain()->Present(syncInterval, 0);

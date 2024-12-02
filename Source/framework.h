@@ -4,6 +4,7 @@
 #include "Graphic\graphics.h"
 #include "Graphic\sprite.h"
 #include <memory>
+#include "Graphic\perlin_noise.h"
 class Framework
 {
 public:
@@ -20,5 +21,7 @@ public:
 	HWND hwnd;
 	CpuTimer timer;
 	Graphics graphics;
-	std::unique_ptr<Sprite> sprite[8];
+	std::unique_ptr<Sprite> sprite[4];
+	std::unique_ptr<PerlinNoise> perlin_noise;
+
 };
