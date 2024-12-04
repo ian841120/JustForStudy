@@ -19,8 +19,11 @@ void PerlinNoise::reseed(unsigned int s)
 		p[256 + i] = p[i];
 	}
 }
-void PerlinNoise::createMesh(int height, int width)
+void PerlinNoise::createImage(int height, int width)
 {
+	this->height = height;
+	this->width = width;
+
 	HRESULT hr = S_OK;
 	ID3D11Device* device = Graphics::getInstance().getDevice();
 	D3D11_INPUT_ELEMENT_DESC input_element_desc[] =
@@ -33,8 +36,6 @@ void PerlinNoise::createMesh(int height, int width)
 	hr = GpuResourceUtils::loadPixelShader(device, "Shader/perlinNoisePS.cso", pixel_shader.GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), L"Create pixel shader failed");
 	
-
-
 	ID3D11DeviceContext* device_context = Graphics::getInstance().getDeviceContext();
 
 	D3D11_VIEWPORT viewport;
@@ -75,7 +76,6 @@ void PerlinNoise::createMesh(int height, int width)
 		}
 	}
 	index_count = static_cast<UINT>(indices.size());
-
 	{
 		D3D11_BUFFER_DESC buffer_desc{};
 		buffer_desc.ByteWidth = static_cast<UINT>(vertices.size() * sizeof(Vertex));
@@ -96,10 +96,44 @@ void PerlinNoise::createMesh(int height, int width)
 		hr = device->CreateBuffer(&buffer_desc, &subresource_data, index_buffer.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), L"Create index buffer failed");
 	}
+	{
+		D3D11_BUFFER_DESC desc;
+		desc.Usage = D3D11_USAGE_DEFAULT;
+		desc.ByteWidth = sizeof(CBuffer);
+		desc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		desc.CPUAccessFlags = 0;
+		desc.MiscFlags = 0;
+		desc.StructureByteStride = 0;
+		HRESULT hr = device->CreateBuffer(&desc, nullptr, constant_buffer.GetAddressOf());
+		_ASSERT_EXPR(SUCCEEDED(hr), L"Create constant buffer failed");
+	}
 }
-void PerlinNoise::render()
+void PerlinNoise::setPixel(float x, float y, float r, float g, float b)
 {
 	ID3D11DeviceContext* device_context = Graphics::getInstance().getDeviceContext();
+	D3D11_MAPPED_SUBRESOURCE mapped_subresource;
+	HRESULT hr = device_context->Map(vertex_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_subresource);
+	_ASSERT_EXPR(SUCCEEDED(hr), L"map failed");
+	Vertex* v = static_cast<Vertex*>(mapped_subresource.pData);
+	int temp = y * width + x;
+	v[temp].color = { r,g,b,1.0f };
+	device_context->Unmap(vertex_buffer.Get(), 0);
+}
+void PerlinNoise::render(int octaves, float lacunarity, float gain)
+{
+	ID3D11DeviceContext* device_context = Graphics::getInstance().getDeviceContext();
+	ID3D11Buffer* constant_buffers[] =
+	{
+		constant_buffer.Get(),
+	};
+	device_context->VSSetConstantBuffers(0, ARRAYSIZE(constant_buffers), constant_buffers);
+	device_context->PSSetConstantBuffers(0, ARRAYSIZE(constant_buffers), constant_buffers);
+	CBuffer cbuffer;
+	cbuffer.octaves = octaves
+	cbuffer.gain = gain;
+
+
+
 	UINT stride = sizeof(Vertex);
 	UINT offset = 0;
 	device_context->IASetVertexBuffers(0, 1, vertex_buffer.GetAddressOf(), &stride, &offset);
@@ -137,6 +171,22 @@ float PerlinNoise::noise2D(float x, float y)
 
 	float average = lerp(v, lerp(u, grad(aa, x, y, 0), grad(ba, x - 1, y, 0)), lerp(u, grad(ab, x, y - 1, 0), grad(bb, x - 1, y - 1, 0)));
 	return map(average, -1, 1, 0, 1);
+}
+float PerlinNoise::accumulatedNoise2D(float x, float y, int octaves , float lacunarity , float gain)
+{
+	float result = 0.0f;
+	float frequency = 1.0f;
+	float amplitude = 1.0f;
+	float maxValue = 0.0f;
+	for (; octaves > 0; octaves--)
+	{
+		result += noise2D(x * frequency, y * frequency) * amplitude;
+		maxValue += amplitude;
+		amplitude *= gain;
+		frequency *= lacunarity;
+	}
+	return result / maxValue;
+
 }
 inline float PerlinNoise::fade(float t)
 {

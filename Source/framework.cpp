@@ -5,12 +5,25 @@
 static const int syncInterval = 1;
 Framework::Framework(HWND hwnd) :hwnd(hwnd),graphics(hwnd)
 {
-	perlin_noise = std::make_unique<PerlinNoise>(1235264);
-	perlin_noise->createMesh(512, 512);
-
+	perlin_noise = std::make_unique<PerlinNoise>(1532512342);
+	perlin_noise->createImage(700, 700);
+	double frequency = 8;
+	float image_height = perlin_noise->getHeight();
+	float image_width = perlin_noise->getWidth();
+	double fx = image_width / frequency;
+	double fy = image_height / frequency;
+	for (int y = 0; y < image_height; y++)
+	{
+		for (int x = 0; x < image_width; x++)
+		{
+			double p = perlin_noise->accumulatedNoise2D(x / fx, y / fy);
+			perlin_noise->setPixel(x, y, p, p, p);
+		}
+	}
 }
 void Framework::update(float elapsedTime)
 {
+
 	graphics.getImGuiClass()->newFrame();
 }
 void Framework::render()

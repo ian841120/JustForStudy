@@ -15,16 +15,19 @@ public:
 		DirectX::XMFLOAT4 color;
 	};
 	void reseed(unsigned int s);
-	void createMesh(int height,int width);
-	void render();
-	void setPixel(float x, float y, float r, float g, float b, float a);
+	void createImage(int height, int width);
+	void render(int octaves = 8, float lacunarity = 2.0f, float gain = 0.5f);
+	void setPixel(float x, float y, float r, float g, float b);
 	float noise1D(float x);
-	float noise2D(float x,float y);
+	float noise2D(float x, float y);
+	float accumulatedNoise2D(float x, float y, int octaves = 8, float lacunarity = 2.0f, float gain = 0.5f);
 	float noise3D(float z);
+	float getHeight()const { return this->height; }
+	float getWidth()const { return this->width; }
 private:
 	int permutation[256] =
 	{
-		151,160,137,91,90,15,		
+		151,160,137,91,90,15,
 		131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
 		190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
 		88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
@@ -38,17 +41,25 @@ private:
 		49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
 		138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180
 	};
+	struct CBuffer
+	{
+		unsigned int p[512];
+		int octaves;
+		float lacunarity;
+		float gain;
+	};
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertex_shader;
 	Microsoft::WRL::ComPtr<ID3D11PixelShader>	pixel_shader;
 	Microsoft::WRL::ComPtr<ID3D11InputLayout>	input_layout;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>		vertex_buffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer>		index_buffer;
+	Microsoft::WRL::ComPtr<ID3D11Buffer>		constant_buffer;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> shader_resource_view;
 	float fade(float t);
 	float lerp(float t, float a, float b);
 	float grad(int hash, float x, float y, float z);
 	float map(float val, float ogMin, float ogMax, float newMin, float newMax);
-	unsigned char p[512];
+	unsigned int p[512];
 	unsigned int seed;
 	UINT index_count;
 	float width;
