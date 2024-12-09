@@ -2,6 +2,9 @@
 #include "gpuResourceUtils.h"
 #include "graphics.h"
 #include <vector>
+#pragma warning( disable : 4996 )
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "../stb_image_write.h"
 PerlinNoise::PerlinNoise(unsigned int  seed)
 {	
 	reseed(seed);
@@ -9,27 +12,22 @@ PerlinNoise::PerlinNoise(unsigned int  seed)
 void PerlinNoise::reseed(unsigned int s) 
 {
 	this->seed = s;
-	for (unsigned int i = 0; i < 256; i++)
+	for (int i = 0; i < 256; i++)
 	{
 		p[i] = i;
 	}
-	std::shuffle(std::begin(p), std::begin(p) + 256, std::default_random_engine(this->seed));
-	for (unsigned int i = 0; i < 256; i++)
-	{
-		p[256 + i] = p[i];
-	}
+	std::shuffle(std::begin(p), std::end(p), std::default_random_engine(this->seed));
 }
 void PerlinNoise::createImage(int height, int width)
 {
-	this->height = height;
-	this->width = width;
+	this->height = static_cast<float>(height);
+	this->width = static_cast<float>(width);
 
 	HRESULT hr = S_OK;
 	ID3D11Device* device = Graphics::getInstance().getDevice();
 	D3D11_INPUT_ELEMENT_DESC input_element_desc[] =
 	{
 		{"POSITION",0,DXGI_FORMAT_R32G32B32_FLOAT,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0},
-		{"COLOR",0,DXGI_FORMAT_R32G32B32A32_FLOAT,0,D3D11_APPEND_ALIGNED_ELEMENT,D3D11_INPUT_PER_VERTEX_DATA,0}
 	};
 	hr = GpuResourceUtils::loadVertexShader(device, "Shader/perlinNoiseVS.cso", vertex_shader.GetAddressOf(), input_element_desc, ARRAYSIZE(input_element_desc), input_layout.GetAddressOf());
 	_ASSERT_EXPR(SUCCEEDED(hr), L"Create vertex shader failed");
@@ -52,13 +50,9 @@ void PerlinNoise::createImage(int height, int width)
 		for (int j = 0; j < width; j++)
 		{
 			Vertex vertex;
-			vertex.position.x = 2.0f * static_cast<float>(j) / screen_width - 1.0f; 
-			vertex.position.y = 1.0f - 2.0f * static_cast<float>(i) / screen_height;
+			vertex.position.x = static_cast<float>(j);
+			vertex.position.y = static_cast<float>(i);
 			vertex.position.z = 0.0f;
-			vertex.color.x = 1.0f;
-			vertex.color.y = 1.0f;
-			vertex.color.z = 1.0f;
-			vertex.color.w = 1.0f;
 			vertices.emplace_back(vertex);
 		}
 	}
@@ -107,6 +101,7 @@ void PerlinNoise::createImage(int height, int width)
 		HRESULT hr = device->CreateBuffer(&desc, nullptr, constant_buffer.GetAddressOf());
 		_ASSERT_EXPR(SUCCEEDED(hr), L"Create constant buffer failed");
 	}
+
 }
 void PerlinNoise::setPixel(float x, float y, float r, float g, float b)
 {
@@ -115,22 +110,38 @@ void PerlinNoise::setPixel(float x, float y, float r, float g, float b)
 	HRESULT hr = device_context->Map(vertex_buffer.Get(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_subresource);
 	_ASSERT_EXPR(SUCCEEDED(hr), L"map failed");
 	Vertex* v = static_cast<Vertex*>(mapped_subresource.pData);
-	int temp = y * width + x;
-	v[temp].color = { r,g,b,1.0f };
+	int temp = (int)(y * width + x);
+	//v[temp].color = { r,g,b,1.0f };
 	device_context->Unmap(vertex_buffer.Get(), 0);
 }
 void PerlinNoise::render(int octaves, float lacunarity, float gain)
 {
 	ID3D11DeviceContext* device_context = Graphics::getInstance().getDeviceContext();
-	ID3D11Buffer* constant_buffers[] =
-	{
-		constant_buffer.Get(),
-	};
-	device_context->VSSetConstantBuffers(0, ARRAYSIZE(constant_buffers), constant_buffers);
-	device_context->PSSetConstantBuffers(0, ARRAYSIZE(constant_buffers), constant_buffers);
+	device_context->VSSetConstantBuffers(0, 1, constant_buffer.GetAddressOf());
+	device_context->PSSetConstantBuffers(0, 1, constant_buffer.GetAddressOf());
+
+	D3D11_VIEWPORT viewport;
+	UINT num_viewports = 1;
+	device_context->RSGetViewports(&num_viewports, &viewport);
+	float screen_width = viewport.Width;
+	float screen_height = viewport.Height;
+
+	// ワールドマトリックスの初期化
+	DirectX::XMMATRIX world = DirectX::XMMatrixIdentity();   
+	// プロジェクションマトリックスの初期化(射影行列変換)
+	DirectX::XMMATRIX projection = DirectX::XMMatrixOrthographicOffCenterLH(0.0f, screen_width, screen_height, 0.0f, 0.0f, 1.0f);
 	CBuffer cbuffer;
-	cbuffer.octaves = octaves
+	cbuffer.wp= DirectX::XMMatrixTranspose(world * projection);
+	cbuffer.octaves = octaves;
 	cbuffer.gain = gain;
+	cbuffer.lacunarity = lacunarity;
+	cbuffer.fx = this->width / (float)this->frequency;
+	cbuffer.fy = this->height / (float)this->frequency;
+	for (int i = 0; i < 256; i++)
+	{
+		cbuffer.p[i].value = p[i];
+	}
+	device_context->UpdateSubresource(constant_buffer.Get(), 0, 0, &cbuffer, 0, 0);
 
 
 
@@ -150,8 +161,7 @@ float PerlinNoise::noise1D(float x)
 	x -= std::floorf(x);
 	float u = fade(x);
 	int a = p[xi];
-	int b = p[xi + 1];
-
+	int b = p[(xi + 1) % 255];
 	float average = lerp(u, grad(a, x, 0, 0), grad(a, x - 1, 0, 0));
 
 	return map(average, -1, 1, 0, 1);
@@ -164,10 +174,10 @@ float PerlinNoise::noise2D(float x, float y)
 	y -= std::floorf(y);
 	float u = fade(x);
 	float v = fade(y);
-	int aa = p[p[xi] + yi];
-	int ab = p[p[xi] + yi + 1];
-	int ba = p[p[xi + 1] + yi];
-	int bb = p[p[xi + 1] + yi + 1];
+	int aa = p[(p[xi % 255] + yi) % 255];
+	int ab = p[(p[xi % 255] + yi + 1) % 255];
+	int ba = p[(p[(xi + 1) % 255] + yi) % 255];
+	int bb = p[(p[(xi + 1) % 255] + yi + 1) % 255];
 
 	float average = lerp(v, lerp(u, grad(aa, x, y, 0), grad(ba, x - 1, y, 0)), lerp(u, grad(ab, x, y - 1, 0), grad(bb, x - 1, y - 1, 0)));
 	return map(average, -1, 1, 0, 1);
@@ -186,7 +196,40 @@ float PerlinNoise::accumulatedNoise2D(float x, float y, int octaves , float lacu
 		frequency *= lacunarity;
 	}
 	return result / maxValue;
+}
+void PerlinNoise::print(std::string filename,int octaves,float lacunarity,float gain)
+{
+	ID3D11DeviceContext* device_context = Graphics::getInstance().getDeviceContext();
 
+	std::vector<unsigned char> vecData((int)this->width * (int)this->height * 4);
+	//イメージデータ格納
+	for (int j = 0; j < this->height; j++)
+	{
+		for (int i = 0; i < this->width; i++)
+		{
+			int iP = (j * this->width + i) * 4;
+			float fx = this->width / (float)this->frequency;
+			float fy = this->height / (float)this->frequency;
+			double color = accumulatedNoise2D(i / fx, j / fy, octaves, lacunarity, gain);
+			vecData[iP] = color * 255;
+			vecData[iP + 1] = color * 255;
+			vecData[iP + 2] = color * 255;
+			vecData[iP + 3] = 255;
+		}
+	}
+
+	int index = 1;
+	int length = filename.length();
+	std::string temp_filename = filename;
+	while (1)
+	{
+		std::ifstream file_check(temp_filename + ".png");
+		if (!file_check.good())
+			break;
+		temp_filename = filename + "(" + std::to_string(index++) + ")";
+	}
+	temp_filename += ".png";
+	stbi_write_png(temp_filename.c_str(), this->width, this->height, 4, &vecData.front(), 0);
 }
 inline float PerlinNoise::fade(float t)
 {

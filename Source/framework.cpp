@@ -5,29 +5,32 @@
 static const int syncInterval = 1;
 Framework::Framework(HWND hwnd) :hwnd(hwnd),graphics(hwnd)
 {
-	perlin_noise = std::make_unique<PerlinNoise>(1532512342);
+	perlin_noise = std::make_unique<PerlinNoise>(56124674);
 	perlin_noise->createImage(700, 700);
-	double frequency = 8;
-	float image_height = perlin_noise->getHeight();
-	float image_width = perlin_noise->getWidth();
-	double fx = image_width / frequency;
-	double fy = image_height / frequency;
-	for (int y = 0; y < image_height; y++)
-	{
-		for (int x = 0; x < image_width; x++)
-		{
-			double p = perlin_noise->accumulatedNoise2D(x / fx, y / fy);
-			perlin_noise->setPixel(x, y, p, p, p);
-		}
-	}
 }
 void Framework::update(float elapsedTime)
 {
 
 	graphics.getImGuiClass()->newFrame();
+	ImGui::Begin("perlin_noise");
+	ImGui::SliderInt("octaves", &octaves, 1, 16);
+	ImGui::SliderFloat("lacunarity", &lacunarity, 1, 16);
+	ImGui::SliderFloat("gain", &gain, 0, 2);
+	if (ImGui::Button("regenerate"))
+	{
+		int seed = rand();
+		perlin_noise->reseed(seed);
+	}
+	ImGui::InputText("filename", filename, 256);
+	if (ImGui::Button("download"))
+	{
+		perlin_noise->print(filename, octaves, lacunarity, gain);
+	}
+	ImGui::End();
 }
 void Framework::render()
 {
+
 	FLOAT color[]{ 0.5f,0.5f,0.5f, 0.2f };
 	ID3D11DeviceContext* dc = graphics.getDeviceContext();
 	ID3D11RenderTargetView* rtv = graphics.getRenderTargetView();
@@ -35,13 +38,13 @@ void Framework::render()
 	dc->ClearRenderTargetView(rtv, color);
 	dc->ClearDepthStencilView(dsv, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
 	dc->OMSetRenderTargets(1, &rtv, dsv);
-	graphics.getImGuiClass()->render();
+	
 
 	//Sprite Render
 	{
-		perlin_noise->render();
+		perlin_noise->render(octaves, lacunarity, gain);
 	}
-
+	graphics.getImGuiClass()->render();
 	graphics.getSwapChain()->Present(syncInterval, 0);
 }
 void Framework::calculateFrameRates()

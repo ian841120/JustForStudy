@@ -23,5 +23,10 @@ public:
 	Graphics graphics;
 	std::unique_ptr<Sprite> sprite[4];
 	std::unique_ptr<PerlinNoise> perlin_noise;
+	char filename[256] = "sample";
+	int octaves = 8;
+	float lacunarity = 2.0f;
+	float gain = 0.5f;
+
 
 };

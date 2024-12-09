@@ -23,7 +23,6 @@ public:
 	void render(float dx, float dy, float dw, float dh, float r, float g, float b, float a);
 	void render(float dx, float dy, float dw, float dh,float angle, float r, float g, float b, float a);
 	void render(float dx, float dy, float dw, float dh, float sx, float sy, float sw, float sh, float angle, float r, float g, float b, float a);
-	void print(std::string filename = "sample");
 	ID3D11Buffer* getVertexBuffer() { return vertex_buffer.Get(); }
 private:
 	Microsoft::WRL::ComPtr<ID3D11VertexShader>	vertex_shader;
