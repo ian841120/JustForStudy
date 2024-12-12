@@ -183,6 +183,7 @@
     <ClCompile Include="Source\Graphic\graphics.cpp" />
     <ClCompile Include="Source\Graphic\image.cpp" />
     <ClCompile Include="Source\Graphic\imGuiClass.cpp" />
+    <ClCompile Include="Source\Graphic\particle.cpp" />
     <ClCompile Include="Source\Graphic\perlin_noise.cpp" />
     <ClCompile Include="Source\Graphic\sprite.cpp" />
     <ClCompile Include="Source\main.cpp" />
@@ -203,6 +204,7 @@
     <ClInclude Include="Source\Graphic\graphics.h" />
     <ClInclude Include="Source\Graphic\image.h" />
     <ClInclude Include="Source\Graphic\imGuiClass.h" />
+    <ClInclude Include="Source\Graphic\particle.h" />
     <ClInclude Include="Source\Graphic\perlin_noise.h" />
     <ClInclude Include="Source\Graphic\sprite.h" />
   </ItemGroup>

@@ -6,25 +6,29 @@ static const int syncInterval = 1;
 Framework::Framework(HWND hwnd) :hwnd(hwnd),graphics(hwnd)
 {
 	perlin_noise = std::make_unique<PerlinNoise>(56124674);
-	perlin_noise->createImage(700, 700);
+	perlin_noise->createImage(512, 512);
 }
 void Framework::update(float elapsedTime)
 {
 
 	graphics.getImGuiClass()->newFrame();
 	ImGui::Begin("perlin_noise");
-	ImGui::SliderInt("octaves", &octaves, 1, 16);
-	ImGui::SliderFloat("lacunarity", &lacunarity, 1, 16);
-	ImGui::SliderFloat("gain", &gain, 0, 2);
-	if (ImGui::Button("regenerate"))
+	ImGui::Checkbox("show", &perlin_noise_show);
+	if (perlin_noise_show)
 	{
-		int seed = rand();
-		perlin_noise->reseed(seed);
-	}
-	ImGui::InputText("filename", filename, 256);
-	if (ImGui::Button("download"))
-	{
-		perlin_noise->print(filename, octaves, lacunarity, gain);
+		ImGui::SliderInt("octaves", &octaves, 1, 16);
+		ImGui::SliderFloat("lacunarity", &lacunarity, 1, 16);
+		ImGui::SliderFloat("gain", &gain, 0, 2);
+		if (ImGui::Button("regenerate"))
+		{
+			int seed = rand();
+			perlin_noise->reseed(seed);
+		}
+		ImGui::InputText("filename", filename, 256);
+		if (ImGui::Button("download"))
+		{
+			perlin_noise->print(filename, octaves, lacunarity, gain);
+		}
 	}
 	ImGui::End();
 }
@@ -41,6 +45,10 @@ void Framework::render()
 	
 
 	//Sprite Render
+	{
+		
+	}
+	if (perlin_noise_show)
 	{
 		perlin_noise->render(octaves, lacunarity, gain);
 	}

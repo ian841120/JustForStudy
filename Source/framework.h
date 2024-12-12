@@ -27,6 +27,7 @@ public:
 	int octaves = 8;
 	float lacunarity = 2.0f;
 	float gain = 0.5f;
+	bool perlin_noise_show = true;
 
 
 };
